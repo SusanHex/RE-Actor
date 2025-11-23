@@ -18,6 +18,15 @@ func SelectAction(action_name string, app_config *config.Config) (actions.Action
 	switch action_name {
 	case "discord_webhook":
 		return actions.DiscordWebHook{URL: app_config.DiscordWebHookURL}, nil
+	case "smtp":
+		return actions.SMTPMail{
+			SMTPHost: app_config.SMTPHost,
+			SMTPPort: app_config.SMTPPort,
+			SendFrom: app_config.SendFrom,
+			SendTo: app_config.SendTo,
+			Subject: app_config.Subject,
+			Password: app_config.Password,
+		}, nil
 	case "test":
 		return actions.TestAction{}, nil
 	default:
