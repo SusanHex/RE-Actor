@@ -58,7 +58,7 @@ func main() {
 		ShowStdout: true,
 		ShowStderr: true,
 		Follow:     true,
-		Tail:       "1",
+		Since:      "1s",
 	})
 	if err != nil {
 		panic(err)
