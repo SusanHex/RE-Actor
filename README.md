@@ -14,7 +14,7 @@ Here is a list of environment variables that are used to configure RE-Actor:
 **Optional**
 | Variable Name | Description |
 |---------------|-------------|
-| `ACTION_NAME` | The name of the action you are using, will default to discord_webhook if not provided. Valid options are: `discord_webhook` or `smtp`. |
+| `ACTION_NAME` | The name of the action you are using, will default to discord_webhook if not provided. Valid options are: `discord_webhook`, `smtp`, or `test`. |
 | `LOG_LEVEL` | Determines how verobose the logging will be. Here are the valid options: `DEBUG`, `INFO`, `WARNING`, and `ERROR`. The default value is `INFO`, if not set. |
 
 **Discord Webhook**
@@ -27,7 +27,12 @@ Here is a list of environment variables that are used to configure RE-Actor:
 |---------------|-------------|
 | `SMPTP_HOST` | The SMTP host you are using. |
 | `SMTP_PORT` | SMTP port you wish to use. |
-| `SEND_FROM` | Email that will be sending the messages. |
-| `SEND_TO` | Email that will receive the messages. |
-| `PASSWORD` | Password for the SEND_FROM email. |
-| `SUBJECT` | Subject for the emails being sent out. |
+| `SMTP_SEND_FROM` | Email that will be sending the messages. |
+| `SMTP_SEND_TO` | Email that will receive the messages. |
+| `SMTP_PASSWORD` | Password for the SEND_FROM email. |
+| `SMTP_SUBJECT` | Subject for the emails being sent out. |
+
+**Test**
+| Variable Name | Description |
+|---------------|-------------|
+| `TEST_ACTION_DELAY` | This is the delay before logging the test action message in miliseconds. Default is `0`. |
