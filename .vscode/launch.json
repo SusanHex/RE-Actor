@@ -7,9 +7,10 @@
 
         {   
             "env": {
-                "ACTION_NAME": "TEST",
+                "ACTION_NAME": "test",
+                "TEST_ACTION_DELAY": "200",
                 "LOG_LEVEL": "DEBUG",
-                "CONTAINER_NAME": "alpine",
+                "CONTAINER_NAME": "reactor-repeater",
                 "PATTERN": "(.+)",
                 "TEMPLATE": "$1"
             },
@@ -17,7 +18,9 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "main.go"
+            "program": "main.go",
+            "preLaunchTask": "Start Repeater",
+            "postDebugTask": "Stop Repeater"
         }
     ]
 }
