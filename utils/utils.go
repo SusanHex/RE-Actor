@@ -22,13 +22,13 @@ func SelectAction(action_name string, app_config *config.Config) (actions.Action
 		return actions.SMTPMail{
 			SMTPHost: app_config.SMTPHost,
 			SMTPPort: app_config.SMTPPort,
-			SendFrom: app_config.SendFrom,
-			SendTo: app_config.SendTo,
-			Subject: app_config.Subject,
-			Password: app_config.Password,
+			SendFrom: app_config.SMTPSendFrom,
+			SendTo:   app_config.SMTPSendTo,
+			Subject:  app_config.SMTPSubject,
+			Password: app_config.SMTPPassword,
 		}, nil
 	case "test":
-		return actions.TestAction{}, nil
+		return actions.TestAction{Delay: app_config.TestActionDelay}, nil
 	default:
 		return nil, fmt.Errorf(`"%s" does not match an action`, action_name)
 	}
