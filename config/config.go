@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -15,7 +16,7 @@ type Config struct {
 	CompiledPattern *regexp.Regexp
 	LogLevel        string `mapstructure:"log_level"`
 	// Discord Webhook Option
-	DiscordWebHookURL string `mapstructure:"discord_webhook_url"`
+	DiscordWebHookURLs []string
 	// SMTP Config Options
 	SMTPHost     string `mapstructure:"smtp_host"`
 	SMTPPort     string `mapstructure:"smtp_port"`
@@ -38,7 +39,9 @@ func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
 	viper_instance.BindEnv("test_action_delay")
 	viper_instance.SetDefault("test_action_delay", 0)
 	viper_instance.BindEnv("container_name")
-	viper_instance.BindEnv("discord_webhook_url")
+	viper_instance.BindEnv("discord_webhook_urls")
+	viper_instance.BindEnv("discord_webhook_url_separator")
+	viper_instance.SetDefault("discord_webhook_url_separator", ";;;")
 	viper_instance.BindEnv("log_level")
 	viper_instance.BindEnv("smtp_host")
 	viper_instance.BindEnv("smtp_port")
@@ -46,9 +49,14 @@ func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
 	viper_instance.BindEnv("smtp_send_to")
 	viper_instance.BindEnv("smtp_subject")
 	viper_instance.BindEnv("smtp_password")
-
 	viper_instance.AutomaticEnv()
-	err := viper_instance.UnmarshalExact(&app_config)
+
+	// Get all the Discord Webhook URLs
+	raw_discord_webhook_urls := viper_instance.GetString("discord_webhook_urls")
+	discord_webhook_url_separator := viper_instance.GetString("discord_webhook_url_separator")
+	app_config.DiscordWebHookURLs = strings.Split(raw_discord_webhook_urls, discord_webhook_url_separator)
+
+	err := viper_instance.Unmarshal(&app_config)
 	if err != nil {
 		return nil, err
 	}
