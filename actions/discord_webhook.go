@@ -10,15 +10,16 @@ import (
 )
 
 type DiscordWebHook struct {
-	URL string
+	URLs []string
 }
 
-func (dwh DiscordWebHook) PostMessage(message string) (*http.Response, error) {
+func (dwh DiscordWebHook) PostMessage(message string) ([]*http.Response, error) {
 	// Discord only allows a max of 2000 characters in the content field.
 	if len(message) > 2000 {
 		return nil, fmt.Errorf("message of %d characters is larger than the max of 2000 allowed for Discord", len(message))
 	}
 
+	responses := make([]*http.Response, 0)
 	body_struct := struct {
 		Content string `json:"content"`
 	}{
@@ -30,16 +31,22 @@ func (dwh DiscordWebHook) PostMessage(message string) (*http.Response, error) {
 	}
 	body := string(body_bytes)
 	client := http.Client{}
-	response, err := client.Post(dwh.URL, "Application/json", strings.NewReader(body))
-	slog.Debug("Discord Webhook Response:", "Status Code", response.StatusCode, "Status", response.Status)
-	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		response_content, err := io.ReadAll(response.Body)
+
+	for _, url := range dwh.URLs {
+		response, err := client.Post(url, "Application/json", strings.NewReader(body))
 		if err != nil {
-			slog.Error("Error reading response body: ", "Error", err)
+			return responses, err
 		}
-		slog.Debug(fmt.Sprintf(`Response Content: "%s"`, response_content))
+		slog.Debug("Discord Webhook Response:", "Status Code", response.StatusCode, "Status", response.Status)
+		if response.StatusCode < 200 || response.StatusCode >= 300 {
+			response_content, err := io.ReadAll(response.Body)
+			if err != nil {
+				slog.Error("Error reading response body: ", "Error", err)
+			}
+			slog.Debug(fmt.Sprintf(`Response Content: "%s"`, response_content))
+		}
 	}
-	return response, err
+	return responses, err
 }
 
 func (dwh DiscordWebHook) Act(message string) error {

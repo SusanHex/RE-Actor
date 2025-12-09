@@ -14,13 +14,14 @@ Here is a list of environment variables that are used to configure RE-Actor:
 **Optional**
 | Variable Name | Description |
 |---------------|-------------|
-| `ACTION_NAME` | The name of the action you are using, will default to discord_webhook if not provided. Valid options are: `discord_webhook`, `smtp`, or `test`. |
+| `ACTION_NAME` | The name of the action you are using, will default to `discord_webhook` if not provided. Valid options are: `discord_webhook`, `smtp`, or `test`. |
 | `LOG_LEVEL` | Determines how verobose the logging will be. Here are the valid options: `DEBUG`, `INFO`, `WARNING`, and `ERROR`. The default value is `INFO`, if not set. |
 
 **Discord Webhook**
 | Variable Name | Description |
 |---------------|-------------|
-| `DISCORD_WEBHOOK_URL` | This is the webhook that RE-Actor will post the resulting message to. |
+| `DISCORD_WEBHOOK_URLS` | These are the webhooks that RE-Actor will post the resulting message to. Mutliple URLs can be specified like this: `<URL 1><URL Separator><URL 2>`. With the default configuration, a multi-URL example would be`https:...;;;https:...`.|
+| `DISCORD_WEBHOOK_URL_SEPARATOR` | This character set separates the URLs in the `DISCORD_WEBHOOK_URLS` variable. If not set, the default is `;;;`. |
 
 **SMTP**
 | Variable Name | Description |
