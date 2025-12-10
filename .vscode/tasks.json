@@ -6,7 +6,7 @@
         {
             "label": "Start Repeater",
             "type": "shell",
-            "command": "docker run -d --name reactor-repeater -e MESSAGES='<<1000 hello world 1;;<<10 hello world 2;;<<5000 hello world 3' susanhex/repeater:latest || docker restart reactor-repeater"
+            "command": "docker run -d --rn --name reactor-repeater -e MESSAGES='<<1000 hello world 1;;<<10 hello world 2;;<<5000 hello world 3' susanhex/repeater:latest"
         },
         {
             "label": "Stop Repeater",
