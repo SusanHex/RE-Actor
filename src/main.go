@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/SusanHex/RE-Actor/config"
-	"github.com/SusanHex/RE-Actor/utils"
+	"github.com/SusanHex/RE-Actor/src/config"
+	"github.com/SusanHex/RE-Actor/src/utils"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"

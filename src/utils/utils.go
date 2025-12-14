@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/SusanHex/RE-Actor/actions"
-	"github.com/SusanHex/RE-Actor/config"
+	"github.com/SusanHex/RE-Actor/src/actions"
+	"github.com/SusanHex/RE-Actor/src/config"
 )
 
 func SelectAction(action_name string, app_config *config.Config) (actions.Action, error) {
