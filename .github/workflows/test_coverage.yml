@@ -21,8 +21,8 @@ jobs:
         go-version: '1.25'
         cache: true
     - name: Switch to src
-      run: cd ./src
-      
+      working-directory: ./src
+
     - name: Install dependencies
       run: go mod download
 
