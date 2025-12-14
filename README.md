@@ -22,8 +22,9 @@ services:
 ```
 In order to run this, place the above text in a file named `compose.yml` and type `docker compose up` within the same folder.
 
-##Configuration
-Here is a list of environme*nt variables that are used to configure RE-Actor:
+## Configuration
+
+Here is a list of environment variables that are used to configure RE-Actor:
 
 **Required**
 | Variable Name | Description |
