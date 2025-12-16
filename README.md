@@ -2,6 +2,28 @@
 
 Hi! Thanks for coming to look at RE-Actor! This application is intended to apply a Regular Expression based pattern to the logs of a Docker container. If the pattern matches the log, then the values are copied into the supplied template. Once complete, the resulting value will be sent to the selected action. Currently, you can post a message to a Discord webhook or send an email through SMTP.
 
+*Example Docker Compose*
+```
+services:
+  reactor:
+    image: susanhex/reactor:latest
+    container_name: reactor
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DISCORD_WEBHOOK_URLS=<insert your Discord Webhook URL here>
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - CONTAINER_NAME=vintage-story-server
+      # This pattern will match when players leave/disconnect/join the vintage story server.
+      - PATTERN=(:?\[Server\sEvent]\s(?:Player\s)?(?P<Player>\S+)\s(?:\[\S+\s)?(?P<Verb>(?:joins)|(?:left)))|(?:\[Server\sNotification]\sUDP\:\sclient\s(?<Verb>\S+)\s(?<Player>\S+)) 
+      # This template will create messages like this: "SusanHex left"
+      - TEMPLATE=$${Player} $${Verb}
+```
+In order to run this, place the above text in a file named `compose.yml` and type `docker compose up` within the same folder.
+
+## Configuration
+
 Here is a list of environment variables that are used to configure RE-Actor:
 
 **Required**

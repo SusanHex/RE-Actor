@@ -11,7 +11,7 @@
         {
             "label": "Stop Repeater",
             "type": "shell",
-            "command": "docker stop reactor-repeater && docker rm reactor-repeater"
+            "command": "docker stop reactor-repeater"
         }
     ]
 }
