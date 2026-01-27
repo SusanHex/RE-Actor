@@ -5,8 +5,11 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"log/slog"
+	"os"
 
 	"github.com/SusanHex/RE-Actor/src/config"
 	"github.com/SusanHex/RE-Actor/src/utils"
@@ -65,7 +68,12 @@ func main() {
 	}
 	for {
 		message, err := utils.GetContainerLog(reader, is_tty)
+
 		if err != nil {
+			if errors.Is(err, io.EOF) {
+				slog.Error("Container closed, exiting...")
+				os.Exit(0)
+			}
 			panic(err)
 		}
 		if len(message) == 0 {

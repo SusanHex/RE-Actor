@@ -79,11 +79,11 @@ func GetContainerLog(log_reader io.Reader, is_tty bool) ([]byte, error) {
 	}
 	header := make([]byte, 8)
 	head_bytes_read, err := log_reader.Read(header)
-	if head_bytes_read < 8 {
-		return []byte{}, nil
-	}
 	if err != nil {
 		return []byte{}, err
+	}
+	if head_bytes_read < 8 {
+		return []byte{}, nil
 	}
 	slog.Debug(string(header))
 	log_message_length := binary.BigEndian.Uint32(header[4:])
