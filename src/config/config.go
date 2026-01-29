@@ -1,7 +1,10 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"regexp"
 	"strings"
 
@@ -10,8 +13,8 @@ import (
 
 type Config struct {
 	ContainerName   string `mapstructure:"container_name"`
-	Pattern         string `mapstructure:"pattern"`
-	Template        string `mapstructure:"template"`
+	Pattern         string `mapstructure:"pattern" json:"pattern"`
+	Template        string `mapstructure:"template" json:"template"`
 	ActionName      string `mapstructure:"action_name"`
 	CompiledPattern *regexp.Regexp
 	LogLevel        string `mapstructure:"log_level"`
@@ -49,7 +52,19 @@ func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
 	viper_instance.BindEnv("smtp_send_to")
 	viper_instance.BindEnv("smtp_subject")
 	viper_instance.BindEnv("smtp_password")
+	viper_instance.BindEnv("template_name")
+	viper_instance.SetDefault("template_name", "")
 	viper_instance.AutomaticEnv()
+
+	// check for tempate name
+	template_name := viper_instance.GetString("template_name")
+	if len(template_name) > 0 {
+		template_url := fmt.Sprintf("https://raw.githubusercontent.com/SusanHex/RE-Actor-Templates/refs/heads/production/templates/%s.json", template_name)
+		config_err := getConfigFileFromURL(template_url, &app_config)
+		if config_err != nil {
+			return nil, config_err
+		}
+	}
 
 	// Get all the Discord Webhook URLs
 	raw_discord_webhook_urls := viper_instance.GetString("discord_webhook_urls")
@@ -76,4 +91,23 @@ func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
 	}
 	app_config.CompiledPattern = compiled_pattern
 	return &app_config, nil
+}
+
+func getConfigFileFromURL(url string, app_config *Config) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	body_content, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Request to \"%s\" status: %d, body: \"%s\"", url, resp.StatusCode, body_content)
+	}
+	err = json.Unmarshal(body_content, app_config)
+	if err != nil {
+		return err
+	}
+	return nil
 }
