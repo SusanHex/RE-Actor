@@ -38,6 +38,7 @@ Here is a list of environment variables that are used to configure RE-Actor:
 |---------------|-------------|
 | `ACTION_NAME` | The name of the action you are using, will default to `discord_webhook` if not provided. Valid options are: `discord_webhook`, `smtp`, or `test`. |
 | `LOG_LEVEL` | Determines how verobose the logging will be. Here are the valid options: `DEBUG`, `INFO`, `WARNING`, and `ERROR`. The default value is `INFO`, if not set. |
+| `TEMLATE_NAME` | As an alternative to setting the `TEMPLATE` and/or `PATTERN` variables, this will attempt to fetch the premade template from the template repository. If the `TEMPLATE` and/or `PATTERN` variables are set, they will replace the respective value fetched from the remote template. The existing templates preside [here](https://github.com/SusanHex/RE-Actor-Templates).
 
 **Discord Webhook**
 | Variable Name | Description |
