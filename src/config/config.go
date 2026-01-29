@@ -60,9 +60,9 @@ func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
 	template_name := viper_instance.GetString("template_name")
 	if len(template_name) > 0 {
 		template_url := fmt.Sprintf("https://raw.githubusercontent.com/SusanHex/RE-Actor-Templates/refs/heads/production/templates/%s.json", template_name)
-		conig_err := getConfigFileFromURL(template_url, &app_config)
-		if conig_err != nil {
-			return nil, conig_err
+		config_err := getConfigFileFromURL(template_url, &app_config)
+		if config_err != nil {
+			return nil, config_err
 		}
 	}
 
