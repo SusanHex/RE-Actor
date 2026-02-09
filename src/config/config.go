@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/SusanHex/RE-Actor/src/actions"
 	"github.com/spf13/viper"
 )
 
@@ -29,6 +30,14 @@ type Config struct {
 	SMTPPassword string `mapstructure:"smtp_password"`
 	// Test Action Option
 	TestActionDelay uint `mapstructure:"test_action_delay"`
+}
+
+type ContainerConfig struct {
+	Name     string
+	Pattern  *regexp.Regexp
+	Template string
+	Enabled  bool
+	Action   *actions.Action
 }
 
 func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
