@@ -30,6 +30,7 @@ type Config struct {
 	SMTPPassword string `mapstructure:"smtp_password"`
 	// Test Action Option
 	TestActionDelay uint `mapstructure:"test_action_delay"`
+	Containers []ContainerConfig
 }
 
 type ContainerConfig struct {
