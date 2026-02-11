@@ -30,7 +30,7 @@ type Config struct {
 	SMTPPassword string `mapstructure:"smtp_password"`
 	// Test Action Option
 	TestActionDelay uint `mapstructure:"test_action_delay"`
-	Containers []ContainerConfig
+	Containers      []ContainerConfig
 }
 
 type ContainerConfig struct {
@@ -121,3 +121,5 @@ func getConfigFileFromURL(url string, app_config *Config) error {
 	}
 	return nil
 }
+
+// TODO: Write a function to create `ContainerConfig` instances from the Docker labels
