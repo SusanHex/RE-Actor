@@ -34,11 +34,15 @@ type Config struct {
 }
 
 type ContainerConfig struct {
-	Name     string
+	Name        string
+	Enabled     bool
+	Action      *actions.Action
+	PatternInfo PatternConfig
+}
+
+type PatternConfig struct {
 	Pattern  *regexp.Regexp
 	Template string
-	Enabled  bool
-	Action   *actions.Action
 }
 
 func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
