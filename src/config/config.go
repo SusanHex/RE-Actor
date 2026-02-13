@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"regexp"
 	"strings"
 
 	"github.com/SusanHex/RE-Actor/src/actions"
+	"github.com/docker/docker/api/types/container"
 	"github.com/spf13/viper"
 )
 
@@ -35,6 +37,7 @@ type Config struct {
 
 type ContainerConfig struct {
 	Name        string
+	ID          string
 	Enabled     bool
 	Action      *actions.Action
 	PatternInfo PatternConfig
@@ -127,3 +130,40 @@ func getConfigFileFromURL(url string, app_config *Config) error {
 }
 
 // TODO: Write a function to create `ContainerConfig` instances from the Docker labels
+
+func fetchContainerConfigsFromLabels(container_summaries []container.Summary) []ContainerConfig {
+	container_configs := make([]ContainerConfig, 0)
+	for _, container_summary := range container_summaries {
+		reactor_enabled, ok := container_summary.Labels["reactor.enabled"]
+		if !ok || reactor_enabled != "true" {
+			continue
+		}
+
+		raw_pattern, has_pattern := container_summary.Labels["reactor.pattern"]
+		if has_pattern && len(raw_pattern) == 0 {
+			has_pattern = false
+		}
+		if !has_pattern {
+			continue
+		}
+		compiled_pattern, err := regexp.Compile(raw_pattern)
+		if err != nil {
+			slog.Error(fmt.Sprintf(`failed to compile pattern for "%v"`, container_summary.Names[0]))
+			continue
+		}
+
+		template, has_template := container_summary.Labels["reactor.template"]
+		if !has_template || len(template) == 0 {
+			template = "\\0"
+		}
+
+		container_configs = append(container_configs, ContainerConfig{
+			Name:        container_summary.Names[0],
+			ID:          container_summary.ID,
+			Enabled:     true,
+			Action:      nil,
+			PatternInfo: PatternConfig{Pattern: compiled_pattern, Template: template},
+		})
+	}
+	return container_configs
+}
