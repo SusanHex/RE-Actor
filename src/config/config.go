@@ -129,7 +129,7 @@ func getConfigFileFromURL(url string, app_config *Config) error {
 	return nil
 }
 
-// TODO: Write a function to create `ContainerConfig` instances from the Docker labels
+// TODO: Adjust this function to be able to fetch the config using the template name
 
 func fetchContainerConfigsFromLabels(container_summaries []container.Summary) []ContainerConfig {
 	container_configs := make([]ContainerConfig, 0)
