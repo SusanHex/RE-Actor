@@ -45,7 +45,8 @@ type ContainerConfig struct {
 
 type PatternConfig struct {
 	Pattern  *regexp.Regexp
-	Template string
+	Template string `json:"template"`
+	RawPattern string `json:"pattern"`
 }
 
 func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
