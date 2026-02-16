@@ -44,8 +44,8 @@ type ContainerConfig struct {
 }
 
 type PatternConfig struct {
-	Pattern  *regexp.Regexp
-	Template string `json:"template"`
+	Pattern    *regexp.Regexp
+	Template   string `json:"template"`
 	RawPattern string `json:"pattern"`
 }
 
@@ -163,7 +163,7 @@ func fetchContainerConfigsFromLabels(container_summaries []container.Summary) []
 			ID:          container_summary.ID,
 			Enabled:     true,
 			Action:      nil,
-			PatternInfo: PatternConfig{Pattern: compiled_pattern, Template: template},
+			PatternInfo: PatternConfig{Pattern: compiled_pattern, Template: template, RawPattern: raw_pattern},
 		})
 	}
 	return container_configs
