@@ -113,21 +113,31 @@ func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
 
 func getConfigFileFromURL(url string)  (PatternConfig, error) {
 	pattern_config := PatternConfig{}
+	
 	resp, err := http.Get(url)
 	if err != nil {
 		return pattern_config, err
 	}
+
 	body_content, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return pattern_config, err
 	}
+
 	if resp.StatusCode != 200 {
 		return pattern_config, fmt.Errorf("Request to \"%s\" status: %d, body: \"%s\"", url, resp.StatusCode, body_content)
 	}
+
 	err = json.Unmarshal(body_content, pattern_config)
 	if err != nil {
 		return pattern_config, err
 	}
+
+	pattern_config.Pattern, err = regexp.Compile(pattern_config.RawPattern)
+	if err != nil {
+		return pattern_config, err
+	}
+
 	return pattern_config, nil
 }
 
