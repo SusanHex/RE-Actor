@@ -111,23 +111,24 @@ func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
 	return &app_config, nil
 }
 
-func getConfigFileFromURL(url string, app_config *Config) error {
+func getConfigFileFromURL(url string)  (PatternConfig, error) {
+	pattern_config := PatternConfig{}
 	resp, err := http.Get(url)
 	if err != nil {
-		return err
+		return pattern_config, err
 	}
 	body_content, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return pattern_config, err
 	}
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("Request to \"%s\" status: %d, body: \"%s\"", url, resp.StatusCode, body_content)
+		return pattern_config, fmt.Errorf("Request to \"%s\" status: %d, body: \"%s\"", url, resp.StatusCode, body_content)
 	}
-	err = json.Unmarshal(body_content, app_config)
+	err = json.Unmarshal(body_content, pattern_config)
 	if err != nil {
-		return err
+		return pattern_config, err
 	}
-	return nil
+	return pattern_config, nil
 }
 
 // TODO: Adjust this function to be able to fetch the config using the template name
