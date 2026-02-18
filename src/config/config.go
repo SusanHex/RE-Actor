@@ -15,12 +15,8 @@ import (
 )
 
 type Config struct {
-	ContainerName   string `mapstructure:"container_name"`
-	Pattern         string `mapstructure:"pattern" json:"pattern"`
-	Template        string `mapstructure:"template" json:"template"`
-	ActionName      string `mapstructure:"action_name"`
-	CompiledPattern *regexp.Regexp
-	LogLevel        string `mapstructure:"log_level"`
+	ActionName string `mapstructure:"action_name"`
+	LogLevel   string `mapstructure:"log_level"`
 	// Discord Webhook Option
 	DiscordWebHookURLs []string
 	// SMTP Config Options
@@ -36,7 +32,7 @@ type Config struct {
 }
 
 type ContainerConfig struct {
-	Name        string
+	Name        string `mapstructure:"container_name"`
 	ID          string
 	Enabled     bool
 	Action      *actions.Action
@@ -45,21 +41,18 @@ type ContainerConfig struct {
 
 type PatternConfig struct {
 	Pattern    *regexp.Regexp
-	Template   string `json:"template"`
-	RawPattern string `json:"pattern"`
+	Template   string `mapstructure:"template" json:"template"`
+	RawPattern string `mapstructure:"pattern" json:"pattern"`
 }
 
 func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
 	app_config := Config{}
 
-	viper_instance.BindEnv("pattern")
-	viper_instance.BindEnv("template")
 	viper_instance.BindEnv("action_name")
 	viper_instance.SetDefault("log_level", "INFO")
 	viper_instance.SetDefault("action_name", "discord_webhook")
 	viper_instance.BindEnv("test_action_delay")
 	viper_instance.SetDefault("test_action_delay", 0)
-	viper_instance.BindEnv("container_name")
 	viper_instance.BindEnv("discord_webhook_urls")
 	viper_instance.BindEnv("discord_webhook_url_separator")
 	viper_instance.SetDefault("discord_webhook_url_separator", ";;;")
@@ -74,14 +67,10 @@ func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
 	viper_instance.SetDefault("template_name", "")
 	viper_instance.AutomaticEnv()
 
-	// check for tempate name
-	template_name := viper_instance.GetString("template_name")
-	if len(template_name) > 0 {
-		template_url := fmt.Sprintf("https://raw.githubusercontent.com/SusanHex/RE-Actor-Templates/refs/heads/production/templates/%s.json", template_name)
-		config_err := getConfigFileFromURL(template_url, &app_config)
-		if config_err != nil {
-			return nil, config_err
-		}
+	var err error
+	app_config.Containers, err = fetchContainerConfigFromEnv(viper_instance)
+	if err != nil {
+		return &app_config, err
 	}
 
 	// Get all the Discord Webhook URLs
@@ -89,7 +78,7 @@ func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
 	discord_webhook_url_separator := viper_instance.GetString("discord_webhook_url_separator")
 	app_config.DiscordWebHookURLs = strings.Split(raw_discord_webhook_urls, discord_webhook_url_separator)
 
-	err := viper_instance.Unmarshal(&app_config)
+	err = viper_instance.Unmarshal(&app_config)
 	if err != nil {
 		return nil, err
 	}
@@ -111,9 +100,9 @@ func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
 	return &app_config, nil
 }
 
-func getConfigFileFromURL(url string)  (PatternConfig, error) {
+func getConfigFileFromURL(url string) (PatternConfig, error) {
 	pattern_config := PatternConfig{}
-	
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return pattern_config, err
@@ -167,6 +156,7 @@ func fetchContainerConfigsFromLabels(container_summaries []container.Summary) []
 		template, has_template := container_summary.Labels["reactor.template"]
 		if !has_template || len(template) == 0 {
 			template = "\\0"
+
 		}
 
 		container_configs = append(container_configs, ContainerConfig{
@@ -178,4 +168,51 @@ func fetchContainerConfigsFromLabels(container_summaries []container.Summary) []
 		})
 	}
 	return container_configs
+}
+
+func fetchContainerConfigFromEnv(viper_instance *viper.Viper) ([]ContainerConfig, error) {
+	container_config := ContainerConfig{Name: "", ID: "", Enabled: false, PatternInfo: PatternConfig{}}
+
+	viper_instance.BindEnv("template_name")
+	viper_instance.SetDefault("template_name", "")
+	template_name := viper_instance.GetString("template_name")
+	if len(template_name) > 0 {
+		template_url := fmt.Sprintf("https://raw.githubusercontent.com/SusanHex/RE-Actor-Templates/refs/heads/production/templates/%s.json", template_name)
+		remote_pattern_config, config_err := getConfigFileFromURL(template_url)
+		if config_err != nil {
+			return nil, config_err
+		}
+		container_config.PatternInfo = remote_pattern_config
+	}
+
+	viper_instance.BindEnv("container_name")
+	err := viper_instance.Unmarshal(&container_config)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(container_config.Name) == 0 {
+		return make([]ContainerConfig, 0), nil
+	}
+
+	viper_instance.BindEnv("pattern")
+	raw_pattern := viper_instance.GetString("pattern")
+	if len(raw_pattern) > 0 {
+		compiled_pattern, err := regexp.Compile(raw_pattern)
+		if err != nil {
+			return nil, err
+		}
+		container_config.PatternInfo.Pattern = compiled_pattern
+		container_config.PatternInfo.RawPattern = raw_pattern
+	}
+
+	viper_instance.BindEnv("template")
+	template := viper_instance.GetString("pattern")
+	if len(template) > 0 {
+		container_config.PatternInfo.Template = template
+	}
+
+	configs := make([]ContainerConfig, 0)
+	configs = append(configs, container_config)
+	return configs, nil
 }
