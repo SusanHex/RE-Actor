@@ -102,7 +102,7 @@ func getConfigFileFromURL(url string) (PatternConfig, error) {
 		return pattern_config, fmt.Errorf("Request to \"%s\" status: %d, body: \"%s\"", url, resp.StatusCode, body_content)
 	}
 
-	err = json.Unmarshal(body_content, pattern_config)
+	err = json.Unmarshal(body_content, &pattern_config)
 	if err != nil {
 		return pattern_config, err
 	}
