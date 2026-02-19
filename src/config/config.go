@@ -117,7 +117,7 @@ func getConfigFileFromURL(url string) (PatternConfig, error) {
 
 // TODO: Adjust this function to be able to fetch the config using the template name
 
-func fetchContainerConfigsFromLabels(container_summaries []container.Summary) []ContainerConfig {
+func FetchContainerConfigsFromLabels(container_summaries []container.Summary) []ContainerConfig {
 	container_configs := make([]ContainerConfig, 0)
 	for _, container_summary := range container_summaries {
 		reactor_enabled, ok := container_summary.Labels["reactor.enabled"]
