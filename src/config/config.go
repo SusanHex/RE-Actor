@@ -45,7 +45,7 @@ type PatternConfig struct {
 	RawPattern string `mapstructure:"pattern" json:"pattern"`
 }
 
-func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
+func GetConfig(viper_instance *viper.Viper) (*Config, error) {
 	app_config := Config{}
 
 	viper_instance.BindEnv("action_name")

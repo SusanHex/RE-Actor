@@ -21,7 +21,7 @@ import (
 
 func main() {
 	viper_instance := viper.NewWithOptions()
-	app_config, err := config.GetConfigFromViper(viper_instance)
+	app_config, err := config.GetConfig(viper_instance)
 	if err != nil {
 		panic(err)
 	}
