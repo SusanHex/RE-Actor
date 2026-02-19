@@ -82,21 +82,6 @@ func GetConfigFromViper(viper_instance *viper.Viper) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	if len(app_config.ContainerName) == 0 {
-		return nil, fmt.Errorf("no container name supplied")
-	}
-	if len(app_config.Pattern) == 0 {
-		return nil, fmt.Errorf("no pattern supplied")
-	}
-	if len(app_config.Template) == 0 {
-		return nil, fmt.Errorf("no template supplied")
-	}
-	compiled_pattern, err := regexp.Compile(app_config.Pattern)
-	if err != nil {
-		return nil, err
-	}
-	app_config.CompiledPattern = compiled_pattern
 	return &app_config, nil
 }
 
