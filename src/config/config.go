@@ -155,6 +155,7 @@ func FetchContainerConfigsFromLabels(container_summaries []container.Summary) []
 	return container_configs
 }
 
+// TODO: Figure out a good way for the config to have access to the containers
 func fetchContainerConfigFromEnv(viper_instance *viper.Viper) ([]ContainerConfig, error) {
 	container_config := ContainerConfig{Name: "", ID: "", Enabled: false, PatternInfo: PatternConfig{}}
 
