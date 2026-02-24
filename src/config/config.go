@@ -13,7 +13,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/spf13/viper"
 )
-
+// TODO: clean up the config file and make it more streamlined
 type Config struct {
 	ActionName string `mapstructure:"action_name"`
 	LogLevel   string `mapstructure:"log_level"`
