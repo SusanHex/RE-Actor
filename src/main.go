@@ -40,6 +40,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	// TODO: fix this function, it has lots of lint errors. Thank you, good day!
 	container_name_filter := filters.NewArgs(filters.KeyValuePair{Key: "name", Value: app_config.ContainerName})
 
 	containers, err := cli.ContainerList(context.Background(), container.ListOptions{Filters: container_name_filter})
