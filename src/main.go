@@ -18,7 +18,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/viper"
 )
-
+// TODO: Move all docker logic to a new "provider" type
 func main() {
 	viper_instance := viper.NewWithOptions()
 	app_config, err := config.GetConfig(viper_instance)
