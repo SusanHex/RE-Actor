@@ -18,7 +18,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/viper"
 )
-// TODO: Move all docker logic to a new "provider" type
+// TODO: Move all docker logic to a new "provider" type. Ideally, the provider system should make implementing new providers easier, with needing large rewrites.
 func main() {
 	viper_instance := viper.NewWithOptions()
 	app_config, err := config.GetConfig(viper_instance)
