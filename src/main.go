@@ -21,6 +21,7 @@ import (
 
 // TODO: Move all docker logic to a new "provider" type. Ideally, the provider system should make implementing new providers easier, with needing large rewrites.
 // TODO: Find a way to have a good provider interface
+// TODO: give `config.GetConfigFromViper` access to the containers
 func main() {
 	viper_instance := viper.NewWithOptions()
 	app_config, err := config.GetConfig(viper_instance)
