@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"os"
+	"time"
 
 	"github.com/SusanHex/RE-Actor/src/config"
 	"github.com/SusanHex/RE-Actor/src/utils"
@@ -55,38 +55,50 @@ func main() {
 		panic(fmt.Sprintf(`Container name: "%s" matched %d containers. Please ensure that the container name is unique to one container.`, app_config.ContainerName, len(containers)))
 	}
 	ctr := containers[0]
-	ctr_inspection, err := cli.ContainerInspect(ctx, ctr.ID)
-	if err != nil {
-		panic(err)
-	}
-	is_tty := ctr_inspection.Config.Tty
-	slog.Debug("Found container:", "ID", ctr.ID, "TTY", is_tty)
-	reader, err := cli.ContainerLogs(ctx, ctr.ID, container.LogsOptions{
-		ShowStdout: true,
-		ShowStderr: true,
-		Follow:     true,
-		Since:      "1s",
-	})
-	if err != nil {
-		panic(err)
-	}
-	for {
-		message, err := utils.GetContainerLog(reader, is_tty)
+	slog.Debug("Waiting for running container...")
 
+	for {
+		ctr_inspection, err := cli.ContainerInspect(ctx, ctr.ID)
 		if err != nil {
-			if errors.Is(err, io.EOF) {
-				slog.Error("Container closed, exiting...")
-				os.Exit(0)
-			}
 			panic(err)
 		}
-		if len(message) == 0 {
+
+		if !ctr_inspection.State.Running {
+			time.Sleep(100 * time.Millisecond)
 			continue
 		}
-		slog.Debug(fmt.Sprintf(`Got message of %d bytes`, len(message)))
-		err = utils.PerformActionIfMatch(app_config, action, message)
+		slog.Debug("Found running container:", "ID", ctr.ID, "TTY", ctr_inspection.Config.Tty)
+
+		reader, err := cli.ContainerLogs(ctx, ctr.ID, container.LogsOptions{
+			ShowStdout: true,
+			ShowStderr: true,
+			Follow:     true,
+			Since:      "1s",
+		})
 		if err != nil {
 			panic(err)
+		}
+
+		for {
+			message, err := utils.GetContainerLog(reader, ctr_inspection.Config.Tty)
+
+			if err != nil {
+				if errors.Is(err, io.EOF) {
+					slog.Debug("Container closed...")
+					break
+				} else {
+					panic(err)
+				}
+
+			}
+			if len(message) == 0 {
+				continue
+			}
+			slog.Debug(fmt.Sprintf(`Got message of %d bytes`, len(message)))
+			err = utils.PerformActionIfMatch(app_config, action, message)
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 }
