@@ -13,6 +13,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/spf13/viper"
 )
+
 // TODO: clean up the config file and make it more streamlined
 type Config struct {
 	ActionName string `mapstructure:"action_name"`
@@ -85,7 +86,7 @@ func GetConfig(viper_instance *viper.Viper) (*Config, error) {
 	return &app_config, nil
 }
 
-func getConfigFileFromURL(url string) (PatternConfig, error) {
+func getPatternConfigFileFromURL(url string) (PatternConfig, error) {
 	pattern_config := PatternConfig{}
 
 	resp, err := http.Get(url)
@@ -115,7 +116,14 @@ func getConfigFileFromURL(url string) (PatternConfig, error) {
 	return pattern_config, nil
 }
 
-// TODO: Adjust this function to be able to fetch the config using the template name
+func getPatternConfigFromTemplateRepository(template_name string) (PatternConfig, error) {
+	template_url := fmt.Sprintf("https://raw.githubusercontent.com/SusanHex/RE-Actor-Templates/refs/heads/production/templates/%s.json", template_name)
+	remote_pattern_config, config_err := getPatternConfigFileFromURL(template_url)
+	if config_err != nil {
+		return PatternConfig{}, config_err
+	}
+	return remote_pattern_config, nil
+}
 
 func FetchContainerConfigsFromLabels(container_summaries []container.Summary) []ContainerConfig {
 	container_configs := make([]ContainerConfig, 0)
@@ -129,9 +137,7 @@ func FetchContainerConfigsFromLabels(container_summaries []container.Summary) []
 		if has_pattern && len(raw_pattern) == 0 {
 			has_pattern = false
 		}
-		if !has_pattern {
-			continue
-		}
+
 		compiled_pattern, err := regexp.Compile(raw_pattern)
 		if err != nil {
 			slog.Error(fmt.Sprintf(`failed to compile pattern for "%v"`, container_summary.Names[0]))
@@ -144,12 +150,33 @@ func FetchContainerConfigsFromLabels(container_summaries []container.Summary) []
 
 		}
 
+		var pattern_config PatternConfig
+
+		template_name, has_template_name := container_summary.Labels["reactor.template-name"]
+		// We only want to grab a remote pattern config if we are missing either/or pattern or template from the labels.
+		if has_template_name && len(template_name) > 0 && (!has_pattern || !has_template) {
+			pattern_config, err = getPatternConfigFromTemplateRepository(template_name)
+
+			// We want the user defined pattern or template inside of the labels to take precedence over the one located in th remote template.
+			if has_pattern {
+				pattern_config.Pattern = compiled_pattern
+				pattern_config.RawPattern = raw_pattern
+			}
+
+			if has_template {
+				pattern_config.Template = template
+			}
+
+		} else {
+			pattern_config = PatternConfig{Pattern: compiled_pattern, Template: template, RawPattern: raw_pattern}
+		}
+
 		container_configs = append(container_configs, ContainerConfig{
 			Name:        container_summary.Names[0],
 			ID:          container_summary.ID,
 			Enabled:     true,
 			Action:      nil,
-			PatternInfo: PatternConfig{Pattern: compiled_pattern, Template: template, RawPattern: raw_pattern},
+			PatternInfo: pattern_config,
 		})
 	}
 	return container_configs
@@ -163,8 +190,7 @@ func fetchContainerConfigFromEnv(viper_instance *viper.Viper) ([]ContainerConfig
 	viper_instance.SetDefault("template_name", "")
 	template_name := viper_instance.GetString("template_name")
 	if len(template_name) > 0 {
-		template_url := fmt.Sprintf("https://raw.githubusercontent.com/SusanHex/RE-Actor-Templates/refs/heads/production/templates/%s.json", template_name)
-		remote_pattern_config, config_err := getConfigFileFromURL(template_url)
+		remote_pattern_config, config_err := getPatternConfigFromTemplateRepository(template_name)
 		if config_err != nil {
 			return nil, config_err
 		}
